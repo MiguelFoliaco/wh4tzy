@@ -116,10 +116,10 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ onSaveStatusChange }) => {
   }, []); // Empty dependency array to run only once on mount
 
   return (
-    <div className="w-full max-w-[850px] mx-auto bg-white min-h-[1056px] shadow-sm ring-1 ring-base-200/50 mt-6 mb-20 py-20 px-16 rounded-sm">
+    <div className="w-full max-w-[900px] mx-auto bg-base-100 min-h-[calc(100vh-60px)] shadow-none ring-1 ring-base-300/40 mt-0 mb-8 py-12 px-14 rounded-none">
       <div
         ref={containerRef}
-        className="prose prose-slate max-w-none focus:outline-none"
+        className="max-w-none focus:outline-none"
       />
     </div>
   );
