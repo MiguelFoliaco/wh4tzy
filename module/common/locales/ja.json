@@ -11,5 +11,17 @@
   "editor.error": "システムエラー",
   "editor.loading": "エディターを読み込んでいます...",
   "editor.subtab.translate.tooltip": "書いた内容を別の言語に翻訳する",
-  "editor.subtab.translate.error.select-language": "言語を選択してください"
+  "editor.subtab.translate.error.select-language": "言語を選択してください",
+  "editor.selectChapter": "章を選択してください",
+  "header.show-my-novels": "私の小説",
+  "myNovels.title": "私の小説",
+  "myNovels.subtitle": "すべてのドキュメントを管理して書く",
+  "myNovels.newNovel": "新しい小説",
+  "myNovels.untitled": "無題",
+  "myNovels.noSynopsis": "あらすじがありません。",
+  "myNovels.updated": "更新日",
+  "myNovels.draft": "下書き",
+  "myNovels.noNovels.title": "小説が見つかりません",
+  "myNovels.noNovels.description": "まだ小説を作成していません。",
+  "myNovels.noNovels.button": "最初の小説を作成する"
 }

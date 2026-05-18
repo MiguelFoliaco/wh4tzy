@@ -2,7 +2,7 @@ import { ProfilePage } from "@/module/profile"
 import { createClient } from "@/supabase/server"
 
 
-export default async function ProfilePages() {
+export default async function Profile() {
 
     const client = await createClient()
     const session = await client.auth.getUser()

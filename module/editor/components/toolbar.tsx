@@ -8,15 +8,16 @@ import { LanguageCode } from 'deepl-node'
 import clsx from 'clsx'
 import { AiOutlineReload } from 'react-icons/ai'
 import { translateText } from '@/module/deepl/service'
-import { BlockAPI, OutputBlockData, BlockChangedEvent } from '@editorjs/editorjs'
-import { EDITOR_HELP_STORAGE_KEY } from './editor.help'
-import { SavedData } from '@editorjs/editorjs/types/data-formats'
+import type { OutputBlockData, } from '@editorjs/editorjs'
+import type { SavedData } from '@editorjs/editorjs/types/data-formats'
 import { useToast } from '@/module/common/hook/useToast'
+
+const EDITOR_HELP_STORAGE_KEY = "novel-draft-data";
 
 
 export const Toolbar = ({ tabHelp, setTabHelp }: { tabHelp: boolean, setTabHelp: (tabHelp: boolean) => void }) => {
 
-    const { t, locale } = useTranslate()
+    const { t } = useTranslate()
     const { activeTool, args, editorValue, editorHelpValue, lastEditorEvent } = useEditorState();
     const [loadingTranslate, setLoadingTranslate] = useState(false);
     const { openToast } = useToast()
@@ -55,7 +56,20 @@ export const Toolbar = ({ tabHelp, setTabHelp }: { tabHelp: boolean, setTabHelp:
 
         if (!force) {
             const data = await editorValue?.save();
-            const arrayParse = data?.blocks.map(block => ({ id: block.id, text: block?.data?.text }))
+            const arrayParse = data?.blocks.map(block => ({ id: block.id, text: block?.data?.text }));
+            //@ts-ignore
+            const arrayUpdate: OutputBlockData[] = arrayParse?.map(e => {
+                const oldAttr = data?.blocks.find(bl => bl.id === e.id) as OutputBlockData;
+                return {
+                    id: e.id,
+                    ...oldAttr!,
+                    data: {
+                        ...oldAttr?.data,
+                        text: arrayTranslate.find(tr => tr.id === e.id)?.text || oldAttr?.data?.text
+                    }
+                }
+            })
+            if (arrayUpdate) await editorHelpValue?.render({ blocks: arrayUpdate });
             return;
         }
 

@@ -5,6 +5,7 @@ import "./globals.css";
 import { Toast } from "@/module/common/components/toast";
 import { LayoutClient } from "./layoutClient";
 import { createClient } from "@/supabase/server";
+import { TranslateProvider } from "@/module/common/hook/useTranslate";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -30,8 +31,10 @@ export default async function RootLayout({
         <LayoutClient
           user={user.data.user}
         >
-          <Toast />
-          {children}
+          <TranslateProvider>
+            <Toast />
+            {children}
+          </TranslateProvider>
         </LayoutClient>
       </body>
     </html>

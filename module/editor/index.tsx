@@ -2,10 +2,14 @@
 
 import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import { TranslateProvider, useTranslate } from "../common/hook/useTranslate";
-import Link from "next/link";
-import { BiPlus } from "react-icons/bi";
+import { useTranslate } from "../common/hook/useTranslate";
 import { Toolbar } from "./components/toolbar";
+import { getDocumentById, upsertDocument } from "./services";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useToast } from "../common/hook/useToast";
+import { useNovel } from "./context/use-novel";
+import { useUser } from "../auth/context/useUser";
+import { HeaderDocument } from "./components/header";
 
 // Dynamically import the EditorCanvas component so it doesn't run during SSR
 const EditorCanvas = dynamic(() => import("./components/editor"), {
@@ -26,10 +30,59 @@ const EditorHelpCanvas = dynamic(() => import("./components/editor.help"), {
 });
 
 const EditorLayoutContent = () => {
+  const { user } = useUser()
   const { t, locale, setLocale } = useTranslate();
+  const { setDocument, document } = useNovel()
+  const [loadingDocument, setLoadingDocument] = useState(false)
   const [title, setTitle] = useState(t("editor.defaultTitle"));
   const [saveStatus, setSaveStatus] = useState<"saved" | "saving" | "error" | null>(null);
   const [tabHelp, setTabHelp] = useState(false)
+  const { openToast } = useToast()
+  const params = useSearchParams()
+  const route = useRouter()
+
+  useEffect(() => {
+    if (!user) return;
+    const id = params.get('id')
+    if (!id) {
+      upsertDocument({
+        body: {
+          title: t("editor.defaultTitle"),
+          status: 'draft',
+          synopsis: '',
+          cover_url: '',
+          updated_at: new Date().toISOString(),
+          auth_id: user.id,
+        }
+      }).then((res) => {
+        if (res.error) {
+          openToast('Error al crear el documento', 'error');
+          return;
+        }
+        if (res.data) {
+          console.log('Redirigiendo...', res.data.id)
+          route.replace(`/editor?id=${res.data.id}&tab=write`)
+          setTitle(res.data.title);
+          setDocument(res.data)
+        }
+      })
+        .catch((err) => {
+          console.error(err)
+        })
+      return;
+    }
+    getDocumentById({ id })
+      .then((res) => {
+        if (res.error) {
+          openToast('No se encontro el documento', 'error');
+          return;
+        }
+        if (res.data) {
+          setTitle(res.data.title);
+          setDocument(res.data);
+        }
+      })
+  }, [user])
 
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -38,94 +91,41 @@ const EditorLayoutContent = () => {
     localStorage.setItem("novel-draft-title", e.target.value);
   };
 
+  const handleSaveTitleKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!user) return;
+    if (e.key === 'Enter' && document) {
+      setLoadingDocument(true)
+      const res = await upsertDocument({
+        body: { title: title, auth_id: user.id, id: document?.id }
+      })
+      console.log(res)
+      setLoadingDocument(false)
+      if (res.error) {
+        openToast('Error al crear el documento', 'error');
+        return;
+      }
+      if (res.data) {
+        setTitle(res.data.title);
+        setDocument(res.data)
+      }
+    }
+  }
+
   return (
     <div className="flex flex-col h-screen w-full bg-base-100 overflow-hidden font-sans">
       {/* Technical Header - Compact */}
-      <header className="flex items-center justify-between px-5 py-3 bg-base-100 border-b border-base-300/30 shrink-0 gap-8">
-        <div className="flex items-center gap-3 flex-1">
-          {/* Logo Icon */}
-          <div className="w-9 h-9 bg-linear-to-br from-primary to-secondary rounded-md flex items-center justify-center text-base-100 font-bold text-lg cursor-pointer hover:shadow-md transition-shadow">
-            ◆
-          </div>
+      <HeaderDocument
+        title={title}
+        loadingDocument={loadingDocument}
+        saveStatus={saveStatus}
+        setTabHelp={setTabHelp}
+        locale={locale}
+        setLocale={setLocale}
+        handleTitleChange={handleTitleChange}
+        handleSaveTitleKeyDown={handleSaveTitleKeyDown}
+        setTitle={setTitle}
 
-          {/* Document Title Input */}
-          <input
-            type="text"
-            value={title}
-            onChange={handleTitleChange}
-            className="text-base font-semibold text-base-content bg-transparent border-none outline-none hover:bg-base-200/40 focus:bg-base-200/40 px-2 py-1 rounded transition-colors min-w-[200px] max-w-sm"
-            placeholder="Untitled document"
-          />
-        </div>
-
-        {/* Center - Document Actions */}
-        <div className="flex items-center gap-1 text-xs text-base-content/60">
-          <button className="btn btn-xs btn-ghost h-9 min-h-9 px-4 gap-1">
-            {t('editor.file')}
-          </button>
-          <button className="btn btn-xs btn-ghost h-9 min-h-9 px-4 gap-1">
-            {t('editor.edit')}
-          </button>
-          <button className="btn btn-xs btn-ghost h-9 min-h-9 px-4 gap-1">
-            {t('editor.view')}
-          </button>
-        </div>
-
-        {/* Right side - Status & Controls */}
-        <div className="flex items-center gap-5">
-          {/* Save Status Indicator */}
-          <div className="text-xs text-base-content/50 flex items-center gap-1.5 min-w-max">
-            {saveStatus === "saving" && (
-              <>
-                <span className="loading loading-spinner loading-xs bg-primary"></span>
-                <span>{t("editor.saving")}</span>
-              </>
-            )}
-            {saveStatus === "saved" && (
-              <>
-                <svg className="w-3.5 h-3.5 text-success" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                </svg>
-                <span>{t("editor.saved")}</span>
-              </>
-            )}
-            {saveStatus === "error" && (
-              <>
-                <svg className="w-3.5 h-3.5 text-error" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" />
-                </svg>
-                <span className="text-error">{t("editor.error")}</span>
-              </>
-            )}
-          </div>
-
-          {/* Language Switcher - Compact */}
-          <select
-            className="select select-xs "
-            value={locale}
-            onChange={(e) => setLocale(e.target.value as "en" | "es" | "ja")}
-          >
-            <option value="en">EN</option>
-            <option value="es">ES</option>
-            <option value="ja">JA</option>
-          </select>
-
-          {/* Share Button */}
-          <button className="btn btn-xs btn-primary ">
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-            </svg>
-            Share
-          </button>
-
-          {/* Profile Avatar */}
-          <Link href="/profile" className="avatar hover:opacity-80 transition-opacity">
-            <div className="w-9 h-9 rounded-md bg-secondary/20 flex items-center justify-center text-secondary font-semibold text-sm border border-secondary/30 hover:border-secondary/50">
-              U
-            </div>
-          </Link>
-        </div>
-      </header>
+      />
 
       {/* Toolbar */}
       <Toolbar tabHelp={tabHelp} setTabHelp={setTabHelp} />
@@ -145,9 +145,7 @@ const EditorLayoutContent = () => {
 
 export const NovelEditor = () => {
   return (
-    <TranslateProvider>
-      <EditorLayoutContent />
-    </TranslateProvider>
+    <EditorLayoutContent />
   );
 };
 

@@ -13,11 +13,11 @@ export const Header = () => {
 
                 {
                     user ?
-                        <div className="join">
+                        <>
                             <Link className="join-item btn btn-primary btn-sm shadow-none" href={'/studio'} >Studio</Link>
                             <Link className="join-item btn btn-primary btn-sm shadow-none" href={'/editor'} >Editor</Link>
                             <Link className="join-item btn btn-primary btn-sm shadow-none" href={'/admin'} >Admin</Link>
-                        </div>
+                        </>
                         :
                         <>
                             <Link className="join-item btn btn-primary btn-sm shadow-none" href={'/auth/login'} >Login</Link>

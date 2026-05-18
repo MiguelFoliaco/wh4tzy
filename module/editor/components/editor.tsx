@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import EditorJS, { OutputData } from "@editorjs/editorjs";
 // @ts-ignore
 import Header from "@editorjs/header";
@@ -19,6 +19,9 @@ import InlineCode from "@editorjs/inline-code";
 
 import { useTranslate } from "../../common/hook/useTranslate";
 import { useEditorState } from "../context/use-editor-state";
+import { getChapterById, upsertChapter } from "../services";
+import { useUser } from "@/module/auth/context/useUser";
+import { useNovel } from "../context/use-novel";
 
 export const EDITOR_STORAGE_KEY = "novel-draft-data";
 
@@ -31,13 +34,33 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ onSaveStatusChange, tabId }
   const editorRef = useRef<EditorJS | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const { t } = useTranslate();
+  const { document, currentChapter, setCurrentChapter } = useNovel();
   const setEditorValue = useEditorState((state) => state.setEditorValue);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const { user } = useUser();
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
+    const firstChapterId = document?.chapters[0]?.id
+    if (firstChapterId) {
+      getChapterById({
+        id: firstChapterId,
+      }).then((res) => {
+        console.log('Result: ', res.data)
+        if (res.data) {
+          setCurrentChapter(res.data)
+        }
+      })
+    }
+  }, [document])
+
+  useEffect(() => {
+    setIsReady(false);
     if (!editorRef.current && containerRef.current) {
+
       // Initialize editor
-      const initialDataStr = localStorage.getItem(`${EDITOR_STORAGE_KEY}-${tabId}`);
+      const initialDataStr = String(currentChapter?.content) ?? localStorage.getItem(`${EDITOR_STORAGE_KEY}-${tabId}`);
+
       let initialData: OutputData | undefined;
 
       if (initialDataStr) {
@@ -83,6 +106,9 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ onSaveStatusChange, tabId }
           marker: Marker,
           inlineCode: InlineCode,
         },
+        onReady: () => {
+          setIsReady(true);
+        },
         onChange: async (api, event) => {
           onSaveStatusChange("saving");
 
@@ -103,6 +129,18 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ onSaveStatusChange, tabId }
             try {
               const data = await api.saver.save();
               localStorage.setItem(`${EDITOR_STORAGE_KEY}-${tabId}`, JSON.stringify(data));
+              await upsertChapter({
+                body: {
+                  auth_id: user?.id,
+                  content: JSON.stringify(data),
+                  status: currentChapter?.status ?? 'draft',
+                  title: currentChapter?.title ?? 'without name',
+                  updated_at: new Date().toISOString(),
+                  doc_id: document?.id,
+                  order_index: currentChapter?.order_index ?? 0,
+                  id: currentChapter?.id,
+                }
+              })
               onSaveStatusChange("saved");
             } catch (error) {
               console.error("Saving failed: ", error);
@@ -128,14 +166,19 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ onSaveStatusChange, tabId }
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Empty dependency array to run only once on mount
+  }, [currentChapter]); // Empty dependency array to run only once on mount
 
   return (
     <div className="w-full relative max-w-[900px] mx-auto bg-base-100 min-h-[calc(100vh-60px)] shadow-none ring-1 ring-base-300/40 mt-0 mb-8 py-12 px-14 rounded-none">
+      {!isReady && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-base-100">
+          <span className="loading loading-spinner loading-lg text-primary"></span>
+        </div>
+      )}
       <div className="absolute w-fit h-fit rounded-md  left-2 top-2 bg-base-200 px-2">{tabId}</div>
       <div
         ref={containerRef}
-        className="max-w-none focus:outline-none"
+        className={`max-w-none focus:outline-none transition-opacity duration-300 ${!isReady ? 'opacity-0' : 'opacity-100'}`}
       />
     </div>
   );

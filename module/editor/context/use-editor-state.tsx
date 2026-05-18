@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import EditorJS from "@editorjs/editorjs";
+import type EditorJS from "@editorjs/editorjs";
 
 type State = {
     editorValue: EditorJS | null;

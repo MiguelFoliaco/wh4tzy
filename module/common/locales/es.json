@@ -11,5 +11,17 @@
   "editor.subtab.new_tab": "Nueva pestaña de ayuda",
   "editor.subtab.hidden_tab": "Ocultar",
   "editor.subtab.translate.tooltip": "Traduce lo que escribes a otro idioma.",
-  "editor.subtab.translate.error.select-language": "Por favor selecciona un idioma."
+  "editor.subtab.translate.error.select-language": "Por favor selecciona un idioma.",
+  "editor.selectChapter": "Selecciona un capítulo",
+  "header.show-my-novels": "Mostrar mis novelas",
+  "myNovels.title": "Mis Novelas",
+  "myNovels.subtitle": "Gestiona y escribe todos tus documentos",
+  "myNovels.newNovel": "Nueva Novela",
+  "myNovels.untitled": "Sin título",
+  "myNovels.noSynopsis": "No se ha proporcionado una sinopsis.",
+  "myNovels.updated": "Actualizado",
+  "myNovels.draft": "Borrador",
+  "myNovels.noNovels.title": "No se encontraron novelas",
+  "myNovels.noNovels.description": "Aún no has creado ninguna novela.",
+  "myNovels.noNovels.button": "Crea tu primera novela"
 }
