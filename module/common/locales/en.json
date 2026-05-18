@@ -5,5 +5,10 @@
   "editor.defaultTitle": "Untitled Document",
   "editor.file": "File",
   "editor.edit": "Edit",
-  "editor.view": "View"
+  "editor.view": "View",
+  "editor.subtab.new_tab": "New tab of help",
+  "editor.subtab.hidden_tab": "Hidden tab",
+  "editor.error": "Error",
+  "editor.loading": "Loading editor...",
+  "editor.subtab.translate.tooltip": "Translate what you write to another language."
 }

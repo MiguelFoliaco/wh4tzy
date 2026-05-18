@@ -1,20 +1,36 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { TranslateProvider, useTranslate } from "../common/hook/useTranslate";
 import Link from "next/link";
+import { BiPlus } from "react-icons/bi";
+import { Toolbar } from "./components/toolbar";
 
 // Dynamically import the EditorCanvas component so it doesn't run during SSR
 const EditorCanvas = dynamic(() => import("./components/editor"), {
   ssr: false,
-  loading: () => <div className="w-full h-full flex items-center justify-center pt-20 text-base-content/50">Loading editor...</div>,
+  loading: () => {
+    const { t } = useTranslate();
+
+    return <div className="w-full h-full flex items-center justify-center pt-20 text-base-content/50" >{t("editor.loading")}</div>
+  },
+});
+const EditorHelpCanvas = dynamic(() => import("./components/editor.help"), {
+  ssr: false,
+  loading: () => {
+    const { t } = useTranslate();
+
+    return <div className="w-full h-full flex items-center justify-center pt-20 text-base-content/50" >{t("editor.loading")}</div>
+  },
 });
 
 const EditorLayoutContent = () => {
   const { t, locale, setLocale } = useTranslate();
   const [title, setTitle] = useState(t("editor.defaultTitle"));
   const [saveStatus, setSaveStatus] = useState<"saved" | "saving" | "error" | null>(null);
+  const [tabHelp, setTabHelp] = useState(false)
+
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTitle(e.target.value);
@@ -28,7 +44,7 @@ const EditorLayoutContent = () => {
       <header className="flex items-center justify-between px-5 py-3 bg-base-100 border-b border-base-300/30 shrink-0 gap-8">
         <div className="flex items-center gap-3 flex-1">
           {/* Logo Icon */}
-          <div className="w-9 h-9 bg-gradient-to-br from-primary to-secondary rounded-md flex items-center justify-center text-base-100 font-bold text-lg cursor-pointer hover:shadow-md transition-shadow">
+          <div className="w-9 h-9 bg-linear-to-br from-primary to-secondary rounded-md flex items-center justify-center text-base-100 font-bold text-lg cursor-pointer hover:shadow-md transition-shadow">
             ◆
           </div>
 
@@ -44,14 +60,14 @@ const EditorLayoutContent = () => {
 
         {/* Center - Document Actions */}
         <div className="flex items-center gap-1 text-xs text-base-content/60">
-          <button className="px-2.5 py-1.5 hover:bg-base-200/40 rounded transition-colors font-medium">
-            File
+          <button className="btn btn-xs btn-ghost h-9 min-h-9 px-4 gap-1">
+            {t('editor.file')}
           </button>
-          <button className="px-2.5 py-1.5 hover:bg-base-200/40 rounded transition-colors font-medium">
-            Edit
+          <button className="btn btn-xs btn-ghost h-9 min-h-9 px-4 gap-1">
+            {t('editor.edit')}
           </button>
-          <button className="px-2.5 py-1.5 hover:bg-base-200/40 rounded transition-colors font-medium">
-            View
+          <button className="btn btn-xs btn-ghost h-9 min-h-9 px-4 gap-1">
+            {t('editor.view')}
           </button>
         </div>
 
@@ -85,7 +101,7 @@ const EditorLayoutContent = () => {
 
           {/* Language Switcher - Compact */}
           <select
-            className="select select-xs focus:outline-none focus:ring-1 focus:ring-primary text-xs bg-base-200/30 border border-base-300/30 h-9 px-2"
+            className="select select-xs "
             value={locale}
             onChange={(e) => setLocale(e.target.value as "en" | "es" | "ja")}
           >
@@ -111,9 +127,17 @@ const EditorLayoutContent = () => {
         </div>
       </header>
 
+      {/* Toolbar */}
+      <Toolbar tabHelp={tabHelp} setTabHelp={setTabHelp} />
+
       {/* Editor Canvas Area - Full Width */}
-      <main className="flex-1 overflow-y-auto w-full bg-gradient-to-b from-base-100 to-base-100">
-        <EditorCanvas onSaveStatusChange={setSaveStatus} />
+      <main className="flex-1 overflow-y-auto py-10 w-full bg-linear-to-b from-base-100 to-primary/5 flex justify-center">
+        <EditorCanvas tabId={'main'} onSaveStatusChange={setSaveStatus} />
+        {
+          tabHelp && (
+            <EditorHelpCanvas tabId={'help'} onSaveStatusChange={setSaveStatus} />
+          )
+        }
       </main>
     </div>
   );

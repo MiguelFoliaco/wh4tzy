@@ -5,5 +5,10 @@
   "editor.defaultTitle": "無題のドキュメント",
   "editor.file": "ファイル",
   "editor.edit": "編集",
-  "editor.view": "表示"
+  "editor.view": "表示",
+  "editor.subtab.new_tab": "新しいヘルプタブ",
+  "editor.subtab.hidden_tab": "タブを非表示",
+  "editor.error": "システムエラー",
+  "editor.loading": "エディターを読み込んでいます...",
+  "editor.subtab.translate.tooltip": "書いた内容を別の言語に翻訳する"
 }

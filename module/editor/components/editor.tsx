@@ -23,9 +23,10 @@ const EDITOR_STORAGE_KEY = "novel-draft-data";
 
 interface EditorCanvasProps {
   onSaveStatusChange: (status: "saved" | "saving" | "error") => void;
+  tabId: string;
 }
 
-const EditorCanvas: React.FC<EditorCanvasProps> = ({ onSaveStatusChange }) => {
+const EditorCanvas: React.FC<EditorCanvasProps> = ({ onSaveStatusChange, tabId }) => {
   const editorRef = useRef<EditorJS | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const { t } = useTranslate();
@@ -34,7 +35,7 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ onSaveStatusChange }) => {
   useEffect(() => {
     if (!editorRef.current && containerRef.current) {
       // Initialize editor
-      const initialDataStr = localStorage.getItem(EDITOR_STORAGE_KEY);
+      const initialDataStr = localStorage.getItem(`${EDITOR_STORAGE_KEY}-${tabId}`);
       let initialData: OutputData | undefined;
 
       if (initialDataStr) {
@@ -90,7 +91,7 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ onSaveStatusChange }) => {
           saveTimeoutRef.current = setTimeout(async () => {
             try {
               const data = await api.saver.save();
-              localStorage.setItem(EDITOR_STORAGE_KEY, JSON.stringify(data));
+              localStorage.setItem(`${EDITOR_STORAGE_KEY}-${tabId}`, JSON.stringify(data));
               onSaveStatusChange("saved");
             } catch (error) {
               console.error("Saving failed: ", error);
@@ -116,7 +117,8 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ onSaveStatusChange }) => {
   }, []); // Empty dependency array to run only once on mount
 
   return (
-    <div className="w-full max-w-[900px] mx-auto bg-base-100 min-h-[calc(100vh-60px)] shadow-none ring-1 ring-base-300/40 mt-0 mb-8 py-12 px-14 rounded-none">
+    <div className="w-full relative max-w-[900px] mx-auto bg-base-100 min-h-[calc(100vh-60px)] shadow-none ring-1 ring-base-300/40 mt-0 mb-8 py-12 px-14 rounded-none">
+      <div className="absolute w-fit h-fit rounded-md  left-2 top-2 bg-base-200 px-2">{tabId}</div>
       <div
         ref={containerRef}
         className="max-w-none focus:outline-none"

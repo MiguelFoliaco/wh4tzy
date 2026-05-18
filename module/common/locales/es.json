@@ -3,7 +3,12 @@
   "editor.saved": "Guardado",
   "editor.saving": "Guardando...",
   "editor.defaultTitle": "Documento sin título",
+  "editor.error": "Error",
   "editor.file": "Archivo",
   "editor.edit": "Editar",
-  "editor.view": "Ver"
+  "editor.view": "Ver",
+  "editor.loading": "Cargando Editor...",
+  "editor.subtab.new_tab": "Nueva pestaña de ayuda",
+  "editor.subtab.hidden_tab": "Ocultar",
+  "editor.subtab.translate.tooltip": "Traduce lo que escribes a otro idioma."
 }
