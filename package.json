@@ -7,9 +7,23 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "types-db": "genTypes.bat"
+    "types-db": "genTypes.bat",
+    "create-migration": "supabase migration new",
+    "diff-migration": "supabase migration diff -f",
+    "push": "supabase db push",
+    "pull": "supabase db pull"
   },
   "dependencies": {
+    "@dnd-kit/helpers": "^0.4.0",
+    "@dnd-kit/react": "^0.4.0",
+    "@editorjs/delimiter": "^1.4.2",
+    "@editorjs/editorjs": "^2.31.6",
+    "@editorjs/header": "^2.8.9",
+    "@editorjs/inline-code": "^1.5.2",
+    "@editorjs/list": "^2.0.9",
+    "@editorjs/marker": "^1.4.0",
+    "@editorjs/paragraph": "^2.11.7",
+    "@editorjs/quote": "^2.7.6",
     "@fontsource-variable/montserrat": "^5.2.8",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.86.0",
@@ -19,6 +33,8 @@
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "react-icons": "^5.5.0",
+    "react-intl": "^10.1.7",
+    "tldraw": "^5.0.1",
     "zustand": "^5.0.8"
   },
   "devDependencies": {
@@ -28,7 +44,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.0.5",
-    "supabase": "^2.63.1",
+    "supabase": "2.99.0-beta.8",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

@@ -1,4 +1,4 @@
-import { AdminPage } from "@/module/admin"
+import { AdminPage } from "@/module/profile"
 import { createClient } from "@/supabase/server"
 
 

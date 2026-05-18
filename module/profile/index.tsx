@@ -5,7 +5,7 @@ import { useUser } from '../auth/context/useUser'
 import { logout } from '../auth/actions/session';
 import { useRouter } from 'next/navigation';
 
-export const AdminPage = () => {
+export const ProfilePage = () => {
     const { user, exit: _exit } = useUser()
     const [loading, setLoading] = useState(false)
     const router = useRouter()

@@ -1,40 +1,65 @@
 @import "tailwindcss";
 @plugin "daisyui";
 
+
 @plugin "daisyui/theme" {
-  name: "lofi";
-  default: true;
+  name: "wh4tzy";
+  default: false;
   prefersdark: false;
   color-scheme: "light";
-  --color-base-100: oklch(100% 0 0);
-  --color-base-200: oklch(97% 0 0);
-  --color-base-300: oklch(94% 0 0);
-  --color-base-content: oklch(0% 0 0);
-  --color-primary: oklch(15.906% 0 0);
-  --color-primary-content: oklch(100% 0 0);
-  --color-secondary: oklch(21.455% 0.001 17.278);
-  --color-secondary-content: oklch(100% 0 0);
-  --color-accent: oklch(26.861% 0 0);
-  --color-accent-content: oklch(100% 0 0);
-  --color-neutral: oklch(0% 0 0);
-  --color-neutral-content: oklch(100% 0 0);
-  --color-info: oklch(79.54% 0.103 205.9);
-  --color-info-content: oklch(15.908% 0.02 205.9);
-  --color-success: oklch(90.13% 0.153 164.14);
-  --color-success-content: oklch(18.026% 0.03 164.14);
-  --color-warning: oklch(88.37% 0.135 79.94);
-  --color-warning-content: oklch(17.674% 0.027 79.94);
-  --color-error: oklch(78.66% 0.15 28.47);
-  --color-error-content: oklch(15.732% 0.03 28.47);
-  --radius-selector: 0.25rem;
-  --radius-field: 0.25rem;
-  --radius-box: 0.25rem;
+
+  /* Backgrounds */
+  --color-base-100: oklch(99% 0.002 255);
+  --color-base-200: oklch(96.5% 0.004 255);
+  --color-base-300: oklch(92% 0.006 255);
+  --color-base-content: oklch(32% 0.01 255);
+
+  /* Google Blue */
+  --color-primary: oklch(58% 0.22 258);
+  --color-primary-content: oklch(98% 0.01 258);
+
+  /* Soft secondary */
+  --color-secondary: oklch(72% 0.08 250);
+  --color-secondary-content: oklch(20% 0.02 250);
+
+  /* Accent similar to Google Docs highlights */
+  --color-accent: oklch(78% 0.14 85);
+  --color-accent-content: oklch(22% 0.03 85);
+
+  /* Neutral UI colors */
+  --color-neutral: oklch(38% 0.01 255);
+  --color-neutral-content: oklch(96% 0.002 255);
+
+  /* Status colors */
+  --color-info: oklch(78% 0.11 240);
+  --color-info-content: oklch(24% 0.03 240);
+
+  --color-success: oklch(74% 0.14 150);
+  --color-success-content: oklch(22% 0.03 150);
+
+  --color-warning: oklch(84% 0.16 85);
+  --color-warning-content: oklch(26% 0.04 85);
+
+  --color-error: oklch(68% 0.21 25);
+  --color-error-content: oklch(96% 0.01 25);
+
+  /* Google style radius */
+  --radius-selector: 0.75rem;
+  --radius-field: 0.5rem;
+  --radius-box: 1rem;
+
+  /* Sizing */
   --size-selector: 0.25rem;
   --size-field: 0.25rem;
+
+  /* Minimal borders like Google Docs */
   --border: 1px;
-  --depth: 1;
+
+  /* Flat UI */
+  --depth: 0;
   --noise: 0;
 }
+
 
 body {
   min-height: 100vh;
@@ -44,4 +69,28 @@ body {
 input,
 textarea {
   outline: none;
+}
+
+h1 {
+  font-weight: bold;
+  font-size: 20px;
+  color: #000000;
+}
+
+h2 {
+  font-weight: bold;
+  font-size: 18px;
+  color: #000000;
+}
+
+h3 {
+  font-weight: bold !important;
+  font-size: 16px;
+  color: #000000;
+}
+
+h4 {
+  font-weight: bold !important;
+  font-size: 14px;
+  color: #000000;
 }
