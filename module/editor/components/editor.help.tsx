@@ -18,8 +18,9 @@ import Marker from "@editorjs/marker";
 import InlineCode from "@editorjs/inline-code";
 
 import { useTranslate } from "../../common/hook/useTranslate";
+import { useEditorState } from "../context/use-editor-state";
 
-const EDITOR_STORAGE_KEY = "novel-draft-data";
+export const EDITOR_HELP_STORAGE_KEY = "novel-draft-data";
 
 interface EditorHelpCanvasProps {
     onSaveStatusChange: (status: "saved" | "saving" | "error") => void;
@@ -30,12 +31,13 @@ const EditorHelpCanvas: React.FC<EditorHelpCanvasProps> = ({ onSaveStatusChange,
     const editorRef = useRef<EditorJS | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const { t } = useTranslate();
+    const setEditorHelpValue = useEditorState((state) => state.setEditorHelpValue);
     const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
         if (!editorRef.current && containerRef.current) {
             // Initialize editor
-            const initialDataStr = localStorage.getItem(`${EDITOR_STORAGE_KEY}-${tabId}`);
+            const initialDataStr = localStorage.getItem(`${EDITOR_HELP_STORAGE_KEY}-${tabId}`);
             let initialData: OutputData | undefined;
 
             if (initialDataStr) {
@@ -91,7 +93,7 @@ const EditorHelpCanvas: React.FC<EditorHelpCanvasProps> = ({ onSaveStatusChange,
                     saveTimeoutRef.current = setTimeout(async () => {
                         try {
                             const data = await api.saver.save();
-                            localStorage.setItem(`${EDITOR_STORAGE_KEY}-${tabId}`, JSON.stringify(data));
+                            localStorage.setItem(`${EDITOR_HELP_STORAGE_KEY}-${tabId}`, JSON.stringify(data));
                             onSaveStatusChange("saved");
                         } catch (error) {
                             console.error("Saving failed: ", error);
@@ -102,6 +104,7 @@ const EditorHelpCanvas: React.FC<EditorHelpCanvasProps> = ({ onSaveStatusChange,
             });
 
             editorRef.current = editor;
+            setEditorHelpValue(editor);
         }
 
         return () => {
@@ -112,9 +115,13 @@ const EditorHelpCanvas: React.FC<EditorHelpCanvasProps> = ({ onSaveStatusChange,
                     console.error("Error destroying editor", e);
                 }
                 editorRef.current = null;
+                setEditorHelpValue(null);
             }
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []); // Empty dependency array to run only once on mount
+
+
 
     return (
         <div className="w-full relative max-w-[900px] mx-auto bg-base-100 min-h-[calc(100vh-60px)] shadow-none ring-1 ring-base-300/40 mt-0 mb-8 py-12 px-14 rounded-none">

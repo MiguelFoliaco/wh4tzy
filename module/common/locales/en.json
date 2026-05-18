@@ -10,5 +10,6 @@
   "editor.subtab.hidden_tab": "Hidden tab",
   "editor.error": "Error",
   "editor.loading": "Loading editor...",
-  "editor.subtab.translate.tooltip": "Translate what you write to another language."
+  "editor.subtab.translate.tooltip": "Translate what you write to another language.",
+  "editor.subtab.translate.error.select-language": "Please select a language."
 }

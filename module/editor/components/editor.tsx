@@ -18,8 +18,9 @@ import Marker from "@editorjs/marker";
 import InlineCode from "@editorjs/inline-code";
 
 import { useTranslate } from "../../common/hook/useTranslate";
+import { useEditorState } from "../context/use-editor-state";
 
-const EDITOR_STORAGE_KEY = "novel-draft-data";
+export const EDITOR_STORAGE_KEY = "novel-draft-data";
 
 interface EditorCanvasProps {
   onSaveStatusChange: (status: "saved" | "saving" | "error") => void;
@@ -30,6 +31,7 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ onSaveStatusChange, tabId }
   const editorRef = useRef<EditorJS | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const { t } = useTranslate();
+  const setEditorValue = useEditorState((state) => state.setEditorValue);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -81,8 +83,17 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ onSaveStatusChange, tabId }
           marker: Marker,
           inlineCode: InlineCode,
         },
-        onChange: async (api) => {
+        onChange: async (api, event) => {
           onSaveStatusChange("saving");
+
+          if (event) {
+            const setLastEditorEvent = useEditorState.getState().setLastEditorEvent;
+            const events = Array.isArray(event) ? event : [event];
+            events.forEach(e => {
+              console.log(e.type, e.detail, e)
+              setLastEditorEvent({ type: e.type, detail: e.detail, });
+            });
+          }
 
           if (saveTimeoutRef.current) {
             clearTimeout(saveTimeoutRef.current);
@@ -102,6 +113,7 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ onSaveStatusChange, tabId }
       });
 
       editorRef.current = editor;
+      setEditorValue(editor);
     }
 
     return () => {
@@ -112,8 +124,10 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ onSaveStatusChange, tabId }
           console.error("Error destroying editor", e);
         }
         editorRef.current = null;
+        setEditorValue(null);
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Empty dependency array to run only once on mount
 
   return (

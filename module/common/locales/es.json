@@ -10,5 +10,6 @@
   "editor.loading": "Cargando Editor...",
   "editor.subtab.new_tab": "Nueva pestaña de ayuda",
   "editor.subtab.hidden_tab": "Ocultar",
-  "editor.subtab.translate.tooltip": "Traduce lo que escribes a otro idioma."
+  "editor.subtab.translate.tooltip": "Traduce lo que escribes a otro idioma.",
+  "editor.subtab.translate.error.select-language": "Por favor selecciona un idioma."
 }

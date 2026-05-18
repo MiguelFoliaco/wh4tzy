@@ -1,3 +1,4 @@
+import { useEditorState } from '@/module/editor/context/use-editor-state'
 import clsx from 'clsx'
 import { Language } from 'deepl-node'
 import { useEffect, useMemo, useState } from 'react'
@@ -10,7 +11,6 @@ type props = {
 }
 export const SelectLanguage = ({ value, onChange }: props) => {
     const [value_, setValue_] = useState<Language['code'] | undefined>(value)
-
     const [isOpen, setIsOpen] = useState(false)
 
     useEffect(() => {

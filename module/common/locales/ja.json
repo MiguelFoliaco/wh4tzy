@@ -10,5 +10,6 @@
   "editor.subtab.hidden_tab": "タブを非表示",
   "editor.error": "システムエラー",
   "editor.loading": "エディターを読み込んでいます...",
-  "editor.subtab.translate.tooltip": "書いた内容を別の言語に翻訳する"
+  "editor.subtab.translate.tooltip": "書いた内容を別の言語に翻訳する",
+  "editor.subtab.translate.error.select-language": "言語を選択してください"
 }
