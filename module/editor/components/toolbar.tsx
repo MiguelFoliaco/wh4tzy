@@ -44,7 +44,7 @@ export const Toolbar = ({ tabHelp, setTabHelp }: { tabHelp: boolean, setTabHelp:
 
     }, [lastEditorEvent, args?.mode]);
 
-    const handleToolTranslate = async (code: LanguageCode) => {
+    const handleToolTranslate = async (code: LanguageCode, force?: boolean) => {
         if (!code) return;
         activeTool('translate', {
             text: args?.text,
@@ -52,6 +52,12 @@ export const Toolbar = ({ tabHelp, setTabHelp }: { tabHelp: boolean, setTabHelp:
             targetLanguage: code,
             mode: 'one'
         });
+
+        if (!force) {
+            const data = await editorValue?.save();
+            const arrayParse = data?.blocks.map(block => ({ id: block.id, text: block?.data?.text }))
+            return;
+        }
 
         //Convertir el contenido de los bloques del editor al idioma seleccionado
         const data = await editorValue?.save();
@@ -139,7 +145,7 @@ export const Toolbar = ({ tabHelp, setTabHelp }: { tabHelp: boolean, setTabHelp:
                                     }}
                                 />
                                 {
-                                    args?.targetLanguage && <button className="btn btn-xs btn-circle mx-2" onClick={() => handleToolTranslate(args.targetLanguage as LanguageCode)}><AiOutlineReload /></button>
+                                    args?.targetLanguage && <button className="btn btn-xs btn-circle mx-2" onClick={() => handleToolTranslate(args.targetLanguage as LanguageCode, true)}><AiOutlineReload /></button>
                                 }
                                 <span className='text-xs ml-4'>In writing?: </span>
                                 <button
