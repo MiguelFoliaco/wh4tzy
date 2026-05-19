@@ -75,12 +75,13 @@ export type GetMyDocumentsReturn = NonNullable<Awaited<ReturnType<typeof getMyDo
 
 
 
-export const getDocumentById = cache(async ({ id }: { id: string }) => {
+export const getDocumentById = async ({ id }: { id: string }) => {
     const client = await createClient();
+    console.log('ID in query ', id)
     const { data, error } = await client.from('docs').select(selectDocument).eq('id', id).maybeSingle();
+    console.log('Data DOC ID ', data, error)
     return { data, error };
 }
-)
 
 type argsChapters = {
     body: TablesInsert<'chapters'> | TablesUpdate<'chapters'>;
@@ -140,4 +141,13 @@ export const getChapterById = async ({ id }: { id: string }) => {
     const client = await createClient();
     const { data, error } = await client.from('chapters').select('*').eq('id', id).maybeSingle();
     return { data, error };
+}
+
+
+
+export const deleteDocument = async ({ id }: { id: string }) => {
+    const client = await createClient();
+    const { data, error, success, statusText, status } = await client.from('docs').delete().eq('id', id);
+
+    return { data, error: error ?? !success };
 }

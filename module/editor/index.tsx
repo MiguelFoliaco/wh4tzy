@@ -40,11 +40,12 @@ const EditorLayoutContent = () => {
   const { openToast } = useToast()
   const params = useSearchParams()
   const route = useRouter()
+  const documentId = params.get('id')
 
   useEffect(() => {
-    if (!user) return;
-    const id = params.get('id')
-    if (!id) {
+    if (!user?.id) return;
+
+    if (!documentId) {
       upsertDocument({
         body: {
           title: t("editor.defaultTitle"),
@@ -71,18 +72,31 @@ const EditorLayoutContent = () => {
         })
       return;
     }
-    getDocumentById({ id })
-      .then((res) => {
-        if (res.error) {
-          openToast('No se encontro el documento', 'error');
-          return;
-        }
-        if (res.data) {
-          setTitle(res.data.title);
-          setDocument(res.data);
-        }
-      })
-  }, [user])
+    else {
+      console.log('Call user doc')
+      try {
+        getDocumentById({ id: documentId })
+          .then((res) => {
+            if (res.error) {
+              openToast('No se encontro el documento', 'error');
+              console.log('Error en documento', res.error)
+              return;
+            }
+            if (res.data) {
+              console.log('Doc title: ', res.data)
+              setTitle(res.data.title);
+              setDocument(res.data);
+            }
+          })
+          .catch(err => {
+            console.log(err)
+          })
+      }
+      catch (err) {
+        console.log(err)
+      }
+    }
+  }, [user?.id, documentId])
 
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -28,6 +28,8 @@ export const HeaderDocument = ({ title, loadingDocument, saveStatus, locale, set
         }
     }
 
+    console.log('Title Doc', title)
+
     return (
         <header className="flex items-center justify-between px-5 py-3 bg-base-100 border-b border-base-300/30 shrink-0 gap-8">
             <div className="flex items-center gap-3 flex-1">

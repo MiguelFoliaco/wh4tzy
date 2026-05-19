@@ -59,7 +59,7 @@ const EditorCanvas: React.FC<EditorCanvasProps> = ({ onSaveStatusChange, tabId }
     if (!editorRef.current && containerRef.current) {
 
       // Initialize editor
-      const initialDataStr = String(currentChapter?.content) ?? localStorage.getItem(`${EDITOR_STORAGE_KEY}-${tabId}`);
+      const initialDataStr = currentChapter?.content as string ?? localStorage.getItem(`${EDITOR_STORAGE_KEY}-${tabId}`);
 
       let initialData: OutputData | undefined;
 

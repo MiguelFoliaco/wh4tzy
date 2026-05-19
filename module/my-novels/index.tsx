@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Header } from '@/module/common/components/header'
 import { useTranslate } from '@/module/common/hook/useTranslate'
 import { GetMyDocumentsReturn } from '../editor/services'
+import { CardNovel } from './components/card'
 
 interface MyNovelsClientProps {
     novels: GetMyDocumentsReturn | null
@@ -40,23 +41,7 @@ export const MyNovelsClient = ({ novels, error }: MyNovelsClientProps) => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {novels?.map(novel => (
-                        <Link key={novel.id} href={`/editor?id=${novel.id}&tab=write`} className="card bg-base-100 hover:bg-base-200 transition-colors shadow-sm ring-1 ring-base-300 hover:shadow-md cursor-pointer">
-                            <div className="card-body p-6">
-                                <h2 className="card-title text-xl mb-1">{novel.title || t('myNovels.untitled')}</h2>
-                                <p className="text-sm text-base-content/60 line-clamp-3 min-h-16">
-                                    {novel.synopsis || t('myNovels.noSynopsis')}
-                                </p>
-
-                                <div className="mt-4 pt-4 border-t border-base-300/50 flex justify-between items-center">
-                                    <div className="text-xs text-base-content/50">
-                                        {t('myNovels.updated')} {new Date(novel.updated_at || novel.created_at || '').toLocaleDateString()}
-                                    </div>
-                                    <div className="badge badge-primary badge-outline text-xs capitalize">
-                                        {novel.status === 'draft' ? t('myNovels.draft') : novel.status}
-                                    </div>
-                                </div>
-                            </div>
-                        </Link>
+                        <CardNovel key={novel.id} novel={novel} />
                     ))}
 
                     {(!novels || novels.length === 0) && !error && (

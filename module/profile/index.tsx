@@ -6,6 +6,7 @@ import { logout } from '../auth/actions/session';
 import { updateProfile } from './actions/update-profile';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/module/common/hook/useToast';
+import { FormTokens } from '../auth/components/form-tokens';
 
 export const ProfilePage = () => {
     const { user, exit: _exit, updateUser } = useUser()
@@ -28,6 +29,9 @@ export const ProfilePage = () => {
             })
         }
     }, [user])
+
+
+
 
     const handleInputChange = (field: string, value: string) => {
         setFormData(prev => ({ ...prev, [field]: value }))
@@ -230,6 +234,11 @@ export const ProfilePage = () => {
                             <span className="badge badge-sm badge-info">Active</span>
                         </div>
                     </div>
+                </div>
+
+
+                <div className='bg-base-100 border border-base-300/30 rounded-lg p-8 space-y-8'>
+                    <FormTokens />
                 </div>
             </div>
         </div>

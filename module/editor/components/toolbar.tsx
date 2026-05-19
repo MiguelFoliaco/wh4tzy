@@ -54,24 +54,24 @@ export const Toolbar = ({ tabHelp, setTabHelp }: { tabHelp: boolean, setTabHelp:
             mode: 'one'
         });
 
-        if (!force) {
-            const data = await editorValue?.save();
-            const arrayParse = data?.blocks.map(block => ({ id: block.id, text: block?.data?.text }));
-            //@ts-ignore
-            const arrayUpdate: OutputBlockData[] = arrayParse?.map(e => {
-                const oldAttr = data?.blocks.find(bl => bl.id === e.id) as OutputBlockData;
-                return {
-                    id: e.id,
-                    ...oldAttr!,
-                    data: {
-                        ...oldAttr?.data,
-                        text: arrayTranslate.find(tr => tr.id === e.id)?.text || oldAttr?.data?.text
-                    }
-                }
-            })
-            if (arrayUpdate) await editorHelpValue?.render({ blocks: arrayUpdate });
-            return;
-        }
+        // if (!force) {
+        //     const data = await editorValue?.save();
+        //     const arrayParse = data?.blocks.map(block => ({ id: block.id, text: block?.data?.text }));
+        //     //@ts-ignore
+        //     const arrayUpdate: OutputBlockData[] = arrayParse?.map(e => {
+        //         const oldAttr = data?.blocks.find(bl => bl.id === e.id) as OutputBlockData;
+        //         return {
+        //             id: e.id,
+        //             ...oldAttr!,
+        //             data: {
+        //                 ...oldAttr?.data,
+        //                 text: arrayTranslate.find(tr => tr.id === e.id)?.text || oldAttr?.data?.text
+        //             }
+        //         }
+        //     })
+        //     if (arrayUpdate) await editorHelpValue?.render({ blocks: arrayUpdate });
+        //     return;
+        // }
 
         //Convertir el contenido de los bloques del editor al idioma seleccionado
         const data = await editorValue?.save();

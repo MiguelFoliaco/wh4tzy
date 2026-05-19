@@ -148,6 +148,30 @@ export type Database = {
         }
         Relationships: []
       }
+      tokens: {
+        Row: {
+          auth_id: string
+          created_at: string | null
+          name: string
+          token_hash: string
+          token_type: Database["public"]["Enums"]["token_type"]
+        }
+        Insert: {
+          auth_id: string
+          created_at?: string | null
+          name: string
+          token_hash: string
+          token_type: Database["public"]["Enums"]["token_type"]
+        }
+        Update: {
+          auth_id?: string
+          created_at?: string | null
+          name?: string
+          token_hash?: string
+          token_type?: Database["public"]["Enums"]["token_type"]
+        }
+        Relationships: []
+      }
       users: {
         Row: {
           auth_id: string
@@ -186,7 +210,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      token_type: "deepl" | "openia"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -313,6 +337,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      token_type: ["deepl", "openia"],
+    },
   },
 } as const
