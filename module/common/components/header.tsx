@@ -11,8 +11,8 @@ export const Header = () => {
     const { t } = useTranslate()
 
     return (
-        <div className="flex justify-between p-3  shadow">
-            <h3 className="text-xl font-medium">WhatZy</h3>
+        <div className="flex justify-between p-3 bg-primary shadow">
+            <h3 className="text-xl font-medium text-primary-content">Wh4tZy</h3>
             <div className='ml-auto mr-2'>
                 <SwitchLan />
             </div>

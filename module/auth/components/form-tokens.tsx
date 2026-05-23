@@ -1,76 +1,79 @@
 'use client'
 
 import { useTranslate } from "@/module/common/hook/useTranslate";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useUser } from "../../auth/context/useUser";
-import { deleteToken, getTokens, upsertToken } from "../actions/token";
+import { getWhatsappAccounts, deleteWhatsappAccount, upsertToken, type GetWhatsappAcountResult } from "../actions/token";
 import { useToast } from "@/module/common/hook/useToast";
-import { BiKey, BiTrash, BiCheck, BiX } from "react-icons/bi";
-import { Enums } from "@/supabase/database.types";
+import { BiKey, BiTrash,  BiTestTube } from "react-icons/bi";
+import { TablesInsert } from "@/supabase/database.types";
+
+const initialState: TablesInsert<'whatsapp_accounts'> = {
+    name: "",
+    provider: "",
+    user_id: ""
+}
 
 export const FormTokens = () => {
     const { t } = useTranslate();
     const { user } = useUser();
     const { openToast } = useToast();
-    const [tokens, setTokens] = useState<any[]>([]);
+    const [tokens, setTokens] = useState<GetWhatsappAcountResult>([]);
     const [loading, setLoading] = useState(true);
+    const [loadingSave, setLoadingSave] = useState(false)
+    const [loadingTestConect, setLoadingTestConect] = useState(false)
+    const [isValidConfiguration, setIsValidConfiguration] = useState(false)
 
-    const [deeplToken, setDeeplToken] = useState("");
-    const [openaiToken, setOpenaiToken] = useState("");
+    const [formToken, setFormToken] = useState<TablesInsert<'whatsapp_accounts'>>(initialState);
 
-    const [savingDeepl, setSavingDeepl] = useState(false);
-    const [savingOpenAI, setSavingOpenAI] = useState(false);
-
-    useEffect(() => {
-        if (user) {
-            loadTokens();
-        }
-    }, [user]);
-
-    const loadTokens = async () => {
+    const loadTokens = useCallback(async () => {
         setLoading(true);
         if (user) {
-            const { data, error } = await getTokens(user.id);
+            const { data, error } = await getWhatsappAccounts(user.id);
             if (!error && data) {
                 setTokens(data);
             }
         }
         setLoading(false);
-    }
+    }, [user])
 
-    const handleSave = async (type: Enums<'token_type'>, tokenValue: string) => {
-        if (!tokenValue) return;
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        loadTokens();
+    }, [loadTokens]);
 
-        if (type === 'deepl') setSavingDeepl(true);
-        if (type === 'openia') setSavingOpenAI(true);
 
-        const res = await upsertToken({
-            body: {
-                auth_id: user!.id,
-                name: type === 'deepl' ? 'DeepL API Key' : 'OpenAI API Key',
-                token_type: type,
-                token_hash: tokenValue
-            }
-        });
 
+    const handleSave = async (args: TablesInsert<'whatsapp_accounts'>) => {
+        if (!isValidConfiguration) return openToast('Please test the connection before saving', 'error');
+        if (!args.name) return openToast('Name is required', 'error');
+        if (!args.phone_number_id) return openToast('Phone number id is required', 'error');
+        if (!args.client_id) return openToast('Client id is required', 'error');
+        if (!args.api_secret) return openToast('API secret is required', 'error');
+        if (!args.access_token) return openToast('Access token is required', 'error');
+        if (!args.bussine_account_id) return openToast('Bussine account id is required', 'error');
+        setLoadingSave(true);
+        args.provider = 'meta';
+        args.auth_id = user?.id || '';
+        args.user_id = '966f5b88-de95-46cf-b9d7-2fdaddae2cfa';
+        const res = await upsertToken({ body: args });
+        console.log(args, res);
         if (res.error) {
             openToast(res.error.toString(), "error");
         } else {
             openToast(t('profile.tokens.saved'), "success");
-            if (type === 'deepl') setDeeplToken("");
-            if (type === 'openia') setOpenaiToken("");
             await loadTokens();
         }
-
-        if (type === 'deepl') setSavingDeepl(false);
-        if (type === 'openia') setSavingOpenAI(false);
+        setFormToken(initialState);
+        setLoadingSave(false);
     }
 
-    const handleDelete = async (tokenHash: string) => {
+    const handleDelete = async (tokenId: string) => {
         const confirmDelete = confirm(t('profile.tokens.deleteConfirm'));
         if (!confirmDelete) return;
 
-        const res = await deleteToken({ id: tokenHash });
+        const res = await deleteWhatsappAccount({ id: user?.id || '', tokenId });
+        console.log(res, tokenId, user?.id);
         if (res.error) {
             openToast(t('profile.tokens.failedDelete'), "error");
         } else {
@@ -79,8 +82,40 @@ export const FormTokens = () => {
         }
     }
 
-    const deeplConnected = tokens.find(t => t.token_type === 'deepl');
-    const openaiConnected = tokens.find(t => t.token_type === 'openia');
+
+    const handleTestConect = async () => {
+        setLoadingTestConect(true);
+        setLoadingSave(true)
+        const res = await fetch(`https://graph.facebook.com/v22.0/${formToken.phone_number_id}`, {
+            headers: {
+                'Authorization': `Bearer ${formToken.access_token}`
+            }
+        });
+
+        if (!res.ok) {
+            setLoadingTestConect(false);
+            const errorData = await res.json();
+            openToast(errorData.error.message || 'Error testing connection', 'error');
+            return setLoadingSave(false);
+        }
+
+        const data = await res.json() as {
+            "verified_name": string,
+            "display_phone_number": string,
+            "id": string
+        };
+
+        setLoadingSave(false)
+        setLoadingTestConect(false);
+        if (data.id === formToken.phone_number_id) {
+            openToast('Connection successful', 'success');
+            setIsValidConfiguration(true);
+        } else {
+            openToast('Connection failed: phone number ID does not match', 'error');
+            setIsValidConfiguration(false);
+        }
+    }
+
 
     if (loading) {
         return (
@@ -95,115 +130,91 @@ export const FormTokens = () => {
             <h2 className="text-xl font-semibold mb-4 text-base-content">{t('profile.tokens.title')}</h2>
             <p className="text-sm text-base-content/60 mb-6">{t('profile.tokens.description')}</p>
 
-            <div className="overflow-x-auto">
-                <table className="table w-full border border-base-200 rounded-lg">
-                    <thead className="bg-base-200 text-base-content/70">
-                        <tr>
-                            <th>{t('profile.tokens.service')}</th>
-                            <th>{t('profile.tokens.status')}</th>
-                            <th>{t('profile.tokens.token')}</th>
-                            <th className="text-right">{t('profile.tokens.actions')}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {/* DeepL Row */}
-                        <tr className="hover:bg-base-200/30 transition-colors">
-                            <td>
-                                <div className="font-semibold flex items-center gap-2 text-base-content">
-                                    <BiKey className="text-primary" /> DeepL Translator
-                                </div>
-                                <div className="text-xs text-base-content/60 mt-1">{t('profile.tokens.deeplDesc')}</div>
-                            </td>
-                            <td>
-                                {deeplConnected ? (
-                                    <span className="badge badge-success gap-1 badge-sm"><BiCheck /> {t('profile.tokens.connected')}</span>
-                                ) : (
-                                    <span className="badge badge-error gap-1 badge-sm"><BiX /> {t('profile.tokens.notConnected')}</span>
-                                )}
-                            </td>
-                            <td>
-                                {deeplConnected ? (
-                                    <span className="text-xs font-mono opacity-50 bg-base-200 px-2 py-1 rounded">********************</span>
-                                ) : (
-                                    <input
-                                        type="password"
-                                        placeholder={t('profile.tokens.pasteDeepl')}
-                                        className="input input-bordered input-sm w-full max-w-xs"
-                                        value={deeplToken}
-                                        onChange={(e) => setDeeplToken(e.target.value)}
-                                    />
-                                )}
-                            </td>
-                            <td className="text-right">
-                                {deeplConnected ? (
-                                    <button
-                                        onClick={() => handleDelete(deeplConnected.token_hash)}
-                                        className="btn btn-sm btn-error btn-outline hover:text-white!"
-                                    >
-                                        <BiTrash /> {t('profile.tokens.delete')}
-                                    </button>
-                                ) : (
-                                    <button
-                                        onClick={() => handleSave('deepl', deeplToken)}
-                                        disabled={!deeplToken || savingDeepl}
-                                        className="btn btn-sm btn-primary"
-                                    >
-                                        {savingDeepl ? <span className="loading loading-spinner loading-xs"></span> : t('profile.tokens.save')}
-                                    </button>
-                                )}
-                            </td>
-                        </tr>
+            <div className="bg-base-200/50 p-4 mb-6 grid grid-cols-2 gap-2">
+                <fieldset className="fieldset">
+                    <legend>Nombre del token:</legend>
+                    <input disabled={loadingSave} type="text" className="input input-sm w-full" value={formToken.name} onChange={(e) => setFormToken({ ...formToken, name: e.target.value })} placeholder="Mi cuenta de WhatsApp" />
+                </fieldset>
 
-                        {/* OpenAI Row */}
-                        <tr className="hover:bg-base-200/30 transition-colors">
-                            <td>
-                                <div className="font-semibold flex items-center gap-2 text-base-content">
-                                    <BiKey className="text-primary" /> OpenAI
+                <fieldset className="fieldset">
+                    <legend>Número de teléfono:</legend>
+                    <input disabled={loadingSave} type="tel" className="input input-sm w-full" value={formToken.phone_number ?? ''} onChange={(e) => setFormToken({ ...formToken, phone_number: e.target.value })} placeholder="+54 9 1234-5678" />
+                </fieldset>
+                <fieldset className="fieldset">
+                    <legend>CLIENT ID:</legend>
+                    <input disabled={loadingSave} type="text" className="input input-sm w-full" value={formToken.client_id ?? ''} onChange={(e) => setFormToken({ ...formToken, client_id: e.target.value })} placeholder="CLIENT ID" />
+                    <span className="label">App id en meta developers</span>
+                </fieldset>
+
+                <fieldset className="fieldset">
+                    <legend>CLIENT SECRET:</legend>
+                    <input disabled={loadingSave} type="text" className="input input-sm w-full" value={formToken.api_secret ?? ''} onChange={(e) => setFormToken({ ...formToken, api_secret: e.target.value })} placeholder="API SECRET" />
+                    <span className="label">Client secret en meta developers</span>
+                </fieldset>
+
+                <fieldset className="fieldset">
+                    <legend>Phone number ID:</legend>
+                    <input disabled={loadingSave} type="tel" className="input input-sm w-full" value={formToken.phone_number_id ?? ''} onChange={(e) => setFormToken({ ...formToken, phone_number_id: e.target.value })} placeholder="Phone number ID" />
+                </fieldset>
+                <fieldset className="fieldset">
+                    <legend>ACCESS TOKEN:</legend>
+                    <input disabled={loadingSave} type="text" className="input input-sm w-full" value={formToken.access_token ?? ''} onChange={(e) => setFormToken({ ...formToken, access_token: e.target.value })} placeholder="ACCESS TOKEN" />
+                </fieldset>
+
+                {/* <fieldset className="fieldset">
+                    <legend>API KEY:</legend>
+                    <input disabled={loadingSave} type="text" className="input input-sm w-full" value={formToken.api_key ?? ''} onChange={(e) => setFormToken({ ...formToken, api_key: e.target.value })} placeholder="API KEY" />
+                </fieldset> */}
+                <fieldset className="fieldset">
+                    <legend>Whatsapp Bussine ID:</legend>
+                    <input disabled={loadingSave} type="text" className="input input-sm w-full" value={formToken.bussine_account_id ?? ''} onChange={(e) => setFormToken({ ...formToken, bussine_account_id: e.target.value })} placeholder="Whatsapp Bussine ID" />
+                </fieldset>
+
+                <fieldset className="fieldset">
+                    <legend>WEBHOOK SECRET:</legend>
+                    <input disabled={loadingSave} type="text" className="input input-sm w-full" value={formToken.webhook_secret ?? ''} onChange={(e) => setFormToken({ ...formToken, webhook_secret: e.target.value })} placeholder="WEBHOOK SECRET" />
+                </fieldset>
+
+                <div className="flex items-end gap-2 mt-2 col-span-2">
+                    <button className="btn btn-success btn-sm" onClick={handleTestConect} disabled={loadingTestConect}>Probar conexión<BiTestTube /></button>
+
+                    <button type="button" className="btn btn-sm btn-primary" onClick={() => handleSave(formToken)} disabled={loadingSave || loadingTestConect || !isValidConfiguration}>
+                        {loadingSave ? 'Guardando...' : 'Guardar'}
+                    </button>
+                </div>
+            </div>
+
+            <div className="overflow-x-auto">
+                <ul>
+                    {
+                        tokens.map((token) => (
+                            <li key={token.id} className="flex items-center justify-between p-4 bg-base-100 rounded-lg mb-4">
+                                <div className="flex items-center gap-4">
+                                    <BiKey size={24} />
+                                    <div className="flex flex-col">
+                                        <span className="text-sm font-medium">{token.name}</span>
+                                        <span className="text-xs text-base-content/60">{token.provider}</span>
+                                        <span className="text-xs text-base-content/60">{token.bussine_account_id}</span>
+                                    </div>
                                 </div>
-                                <div className="text-xs text-base-content/60 mt-1">{t('profile.tokens.openaiDesc')}</div>
-                            </td>
-                            <td className='w-[180px]'>
-                                {openaiConnected ? (
-                                    <span className="badge badge-success gap-1 badge-sm"><BiCheck /> {t('profile.tokens.connected')}</span>
-                                ) : (
-                                    <span className="badge badge-error gap-1 badge-sm"><BiX /> {t('profile.tokens.notConnected')}</span>
-                                )}
-                            </td>
-                            <td>
-                                {openaiConnected ? (
-                                    <span className="text-xs font-mono opacity-50 bg-base-200 px-2 py-1 rounded">********************</span>
-                                ) : (
-                                    <input
-                                        type="password"
-                                        placeholder={t('profile.tokens.pasteOpenAI')}
-                                        className="input input-bordered input-sm w-full max-w-xs"
-                                        value={openaiToken}
-                                        onChange={(e) => setOpenaiToken(e.target.value)}
-                                    />
-                                )}
-                            </td>
-                            <td className="text-right">
-                                {openaiConnected ? (
-                                    <button
-                                        onClick={() => handleDelete(openaiConnected.token_hash)}
-                                        className="btn btn-sm btn-error btn-outline hover:text-white!"
-                                    >
-                                        <BiTrash /> {t('profile.tokens.delete')}
-                                    </button>
-                                ) : (
-                                    <button
-                                        onClick={() => handleSave('openia', openaiToken)}
-                                        disabled={!openaiToken || savingOpenAI}
-                                        className="btn btn-sm btn-primary"
-                                    >
-                                        {savingOpenAI ? <span className="loading loading-spinner loading-xs"></span> : t('profile.tokens.save')}
-                                    </button>
-                                )}
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                                <div className="flex gap-2">
+                                    <button className="btn btn-primary btn-sm" onClick={() => handleDelete(token.id)}><BiTrash size={16} /></button>
+                                </div>
+                            </li>
+                        ))
+                    }
+                    {
+                        tokens.length === 0 && (
+                            <li className="text-center text-sm text-base-content/60 py-8 bg-info/10 rounded-lg">
+                                {t('profile.tokens.noTokens')}
+                            </li>
+                        )
+                    }
+                </ul>
             </div>
         </div>
     )
 }
+
+
+

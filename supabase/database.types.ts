@@ -14,193 +14,498 @@ export type Database = {
   }
   public: {
     Tables: {
-      chapters: {
+      ai_settings: {
         Row: {
-          auth_id: string
-          content: Json | null
-          created_at: string | null
-          doc_id: string
+          bot_id: string
           id: string
-          order_index: number
-          status: string | null
-          title: string
-          updated_at: string | null
+          max_tokens: number | null
+          model: string | null
+          provider: Database["public"]["Enums"]["ai_provider"]
+          system_prompt: string | null
+          temperature: number | null
         }
         Insert: {
-          auth_id: string
-          content?: Json | null
-          created_at?: string | null
-          doc_id: string
+          bot_id: string
           id?: string
-          order_index?: number
-          status?: string | null
-          title: string
-          updated_at?: string | null
+          max_tokens?: number | null
+          model?: string | null
+          provider?: Database["public"]["Enums"]["ai_provider"]
+          system_prompt?: string | null
+          temperature?: number | null
         }
         Update: {
-          auth_id?: string
-          content?: Json | null
-          created_at?: string | null
-          doc_id?: string
+          bot_id?: string
           id?: string
-          order_index?: number
-          status?: string | null
-          title?: string
-          updated_at?: string | null
+          max_tokens?: number | null
+          model?: string | null
+          provider?: Database["public"]["Enums"]["ai_provider"]
+          system_prompt?: string | null
+          temperature?: number | null
         }
         Relationships: [
           {
-            foreignKeyName: "chapters_doc_id_fkey"
-            columns: ["doc_id"]
-            isOneToOne: false
-            referencedRelation: "docs"
+            foreignKeyName: "ai_settings_bot_id_fkey"
+            columns: ["bot_id"]
+            isOneToOne: true
+            referencedRelation: "bots"
             referencedColumns: ["id"]
           },
         ]
       }
-      docs: {
+      bot_documents: {
         Row: {
-          auth_id: string
-          cover_url: string | null
+          bot_id: string
+          content: string | null
           created_at: string | null
           id: string
-          status: string | null
-          synopsis: string | null
-          title: string
-          updated_at: string | null
+          source: string | null
+          title: string | null
         }
         Insert: {
-          auth_id: string
-          cover_url?: string | null
+          bot_id: string
+          content?: string | null
           created_at?: string | null
           id?: string
-          status?: string | null
-          synopsis?: string | null
-          title: string
-          updated_at?: string | null
+          source?: string | null
+          title?: string | null
         }
         Update: {
-          auth_id?: string
-          cover_url?: string | null
+          bot_id?: string
+          content?: string | null
           created_at?: string | null
           id?: string
-          status?: string | null
-          synopsis?: string | null
-          title?: string
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
-      novel_tags: {
-        Row: {
-          auth_id: string
-          created_at: string | null
-          novel_id: string
-          tag_id: string
-        }
-        Insert: {
-          auth_id: string
-          created_at?: string | null
-          novel_id: string
-          tag_id: string
-        }
-        Update: {
-          auth_id?: string
-          created_at?: string | null
-          novel_id?: string
-          tag_id?: string
+          source?: string | null
+          title?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "novel_tags_novel_id_fkey"
-            columns: ["novel_id"]
+            foreignKeyName: "bot_documents_bot_id_fkey"
+            columns: ["bot_id"]
             isOneToOne: false
-            referencedRelation: "docs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "novel_tags_tag_id_fkey"
-            columns: ["tag_id"]
-            isOneToOne: false
-            referencedRelation: "tags"
+            referencedRelation: "bots"
             referencedColumns: ["id"]
           },
         ]
       }
-      tags: {
+      bot_flows: {
         Row: {
-          auth_id: string
+          bot_id: string
           created_at: string | null
           id: string
+          is_default: boolean | null
           name: string
         }
         Insert: {
-          auth_id: string
+          bot_id: string
           created_at?: string | null
           id?: string
+          is_default?: boolean | null
           name: string
         }
         Update: {
-          auth_id?: string
+          bot_id?: string
           created_at?: string | null
           id?: string
+          is_default?: boolean | null
           name?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "bot_flows_bot_id_fkey"
+            columns: ["bot_id"]
+            isOneToOne: false
+            referencedRelation: "bots"
+            referencedColumns: ["id"]
+          },
+        ]
       }
-      tokens: {
+      bot_variables: {
         Row: {
-          auth_id: string
-          created_at: string | null
-          name: string
-          token_hash: string
-          token_type: Database["public"]["Enums"]["token_type"]
+          bot_id: string
+          id: string
+          key: string
+          value: string | null
         }
         Insert: {
-          auth_id: string
-          created_at?: string | null
-          name: string
-          token_hash: string
-          token_type: Database["public"]["Enums"]["token_type"]
+          bot_id: string
+          id?: string
+          key: string
+          value?: string | null
         }
         Update: {
-          auth_id?: string
-          created_at?: string | null
-          name?: string
-          token_hash?: string
-          token_type?: Database["public"]["Enums"]["token_type"]
+          bot_id?: string
+          id?: string
+          key?: string
+          value?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "bot_variables_bot_id_fkey"
+            columns: ["bot_id"]
+            isOneToOne: false
+            referencedRelation: "bots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bots: {
+        Row: {
+          auth_id: string | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          type: Database["public"]["Enums"]["bot_type"]
+          updated_at: string | null
+          user_id: string
+          welcome_message: string | null
+          whatsapp_account_id: string | null
+        }
+        Insert: {
+          auth_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          type?: Database["public"]["Enums"]["bot_type"]
+          updated_at?: string | null
+          user_id: string
+          welcome_message?: string | null
+          whatsapp_account_id?: string | null
+        }
+        Update: {
+          auth_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          type?: Database["public"]["Enums"]["bot_type"]
+          updated_at?: string | null
+          user_id?: string
+          welcome_message?: string | null
+          whatsapp_account_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bots_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bots_whatsapp_account_id_fkey"
+            columns: ["whatsapp_account_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contacts: {
+        Row: {
+          created_at: string | null
+          id: string
+          metadata: Json | null
+          name: string | null
+          phone_number: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          name?: string | null
+          phone_number: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          name?: string | null
+          phone_number?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contacts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversations: {
+        Row: {
+          bot_id: string | null
+          closed_at: string | null
+          contact_id: string | null
+          id: string
+          started_at: string | null
+          status: string | null
+        }
+        Insert: {
+          bot_id?: string | null
+          closed_at?: string | null
+          contact_id?: string | null
+          id?: string
+          started_at?: string | null
+          status?: string | null
+        }
+        Update: {
+          bot_id?: string | null
+          closed_at?: string | null
+          contact_id?: string | null
+          id?: string
+          started_at?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_bot_id_fkey"
+            columns: ["bot_id"]
+            isOneToOne: false
+            referencedRelation: "bots"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      flow_connections: {
+        Row: {
+          id: string
+          next_node_id: string | null
+          node_id: string
+          option_label: string
+          option_value: string | null
+        }
+        Insert: {
+          id?: string
+          next_node_id?: string | null
+          node_id: string
+          option_label: string
+          option_value?: string | null
+        }
+        Update: {
+          id?: string
+          next_node_id?: string | null
+          node_id?: string
+          option_label?: string
+          option_value?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "flow_connections_next_node_id_fkey"
+            columns: ["next_node_id"]
+            isOneToOne: false
+            referencedRelation: "flow_nodes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "flow_connections_node_id_fkey"
+            columns: ["node_id"]
+            isOneToOne: false
+            referencedRelation: "flow_nodes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      flow_nodes: {
+        Row: {
+          created_at: string | null
+          flow_id: string
+          id: string
+          message: string
+          node_key: string
+          node_type: Database["public"]["Enums"]["node_type"] | null
+        }
+        Insert: {
+          created_at?: string | null
+          flow_id: string
+          id?: string
+          message: string
+          node_key: string
+          node_type?: Database["public"]["Enums"]["node_type"] | null
+        }
+        Update: {
+          created_at?: string | null
+          flow_id?: string
+          id?: string
+          message?: string
+          node_key?: string
+          node_type?: Database["public"]["Enums"]["node_type"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "flow_nodes_flow_id_fkey"
+            columns: ["flow_id"]
+            isOneToOne: false
+            referencedRelation: "bot_flows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          content: string | null
+          conversation_id: string
+          created_at: string | null
+          direction: string
+          id: string
+          message_type: string | null
+          provider_message_id: string | null
+          sender: string | null
+        }
+        Insert: {
+          content?: string | null
+          conversation_id: string
+          created_at?: string | null
+          direction: string
+          id?: string
+          message_type?: string | null
+          provider_message_id?: string | null
+          sender?: string | null
+        }
+        Update: {
+          content?: string | null
+          conversation_id?: string
+          created_at?: string | null
+          direction?: string
+          id?: string
+          message_type?: string | null
+          provider_message_id?: string | null
+          sender?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       users: {
         Row: {
           auth_id: string
+          avatar_url: string | null
           created_at: string | null
+          email: string
           id: string
-          is_active: boolean | null
-          profile_url: string | null
+          lastname: string | null
+          name: string | null
+          phone_number: string | null
+          refarral_code: string | null
+          role: Database["public"]["Enums"]["user_role"] | null
           updated_at: string | null
-          username: string
+          username: string | null
         }
         Insert: {
           auth_id: string
+          avatar_url?: string | null
           created_at?: string | null
+          email: string
           id?: string
-          is_active?: boolean | null
-          profile_url?: string | null
+          lastname?: string | null
+          name?: string | null
+          phone_number?: string | null
+          refarral_code?: string | null
+          role?: Database["public"]["Enums"]["user_role"] | null
           updated_at?: string | null
-          username: string
+          username?: string | null
         }
         Update: {
           auth_id?: string
+          avatar_url?: string | null
           created_at?: string | null
+          email?: string
           id?: string
-          is_active?: boolean | null
-          profile_url?: string | null
+          lastname?: string | null
+          name?: string | null
+          phone_number?: string | null
+          refarral_code?: string | null
+          role?: Database["public"]["Enums"]["user_role"] | null
           updated_at?: string | null
-          username?: string
+          username?: string | null
         }
         Relationships: []
+      }
+      whatsapp_accounts: {
+        Row: {
+          access_token: string | null
+          api_key: string | null
+          api_secret: string | null
+          auth_id: string | null
+          bussine_account_id: string | null
+          client_id: string | null
+          created_at: string | null
+          id: string
+          name: string
+          phone_number: string | null
+          phone_number_id: string | null
+          provider: string
+          refresh_token: string | null
+          status: Database["public"]["Enums"]["status_type"] | null
+          updated_at: string | null
+          user_id: string
+          webhook_secret: string | null
+        }
+        Insert: {
+          access_token?: string | null
+          api_key?: string | null
+          api_secret?: string | null
+          auth_id?: string | null
+          bussine_account_id?: string | null
+          client_id?: string | null
+          created_at?: string | null
+          id?: string
+          name: string
+          phone_number?: string | null
+          phone_number_id?: string | null
+          provider: string
+          refresh_token?: string | null
+          status?: Database["public"]["Enums"]["status_type"] | null
+          updated_at?: string | null
+          user_id: string
+          webhook_secret?: string | null
+        }
+        Update: {
+          access_token?: string | null
+          api_key?: string | null
+          api_secret?: string | null
+          auth_id?: string | null
+          bussine_account_id?: string | null
+          client_id?: string | null
+          created_at?: string | null
+          id?: string
+          name?: string
+          phone_number?: string | null
+          phone_number_id?: string | null
+          provider?: string
+          refresh_token?: string | null
+          status?: Database["public"]["Enums"]["status_type"] | null
+          updated_at?: string | null
+          user_id?: string
+          webhook_secret?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_accounts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -210,7 +515,12 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      ai_provider: "openai" | "gemini" | "anthropic" | "deepseek"
+      bot_type: "menu" | "ai" | "hybrid"
+      node_type: "message" | "menu" | "input" | "api"
+      status_type: "connected" | "disconnected" | "pending"
       token_type: "deepl" | "openia"
+      user_role: "owner" | "admin" | "editor" | "viewer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -338,7 +648,12 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      ai_provider: ["openai", "gemini", "anthropic", "deepseek"],
+      bot_type: ["menu", "ai", "hybrid"],
+      node_type: ["message", "menu", "input", "api"],
+      status_type: ["connected", "disconnected", "pending"],
       token_type: ["deepl", "openia"],
+      user_role: ["owner", "admin", "editor", "viewer"],
     },
   },
 } as const

@@ -21,6 +21,7 @@ export default async function RootLayout({
   const client = await createClient()
 
   const user = await client.auth.getUser()
+  const userDB = await client.from('users').select('*').eq('auth_id', user?.data?.user?.id || '').maybeSingle()
 
   return (
     <html lang="en">
@@ -30,6 +31,7 @@ export default async function RootLayout({
       >
         <LayoutClient
           user={user.data.user}
+          userDB={userDB.data!}
         >
           <TranslateProvider>
             <Toast />

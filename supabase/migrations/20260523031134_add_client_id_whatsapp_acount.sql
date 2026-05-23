@@ -1,0 +1,1 @@
+alter table whatsapp_accounts add column client_id varchar(255);

@@ -46,5 +46,6 @@
   "profile.tokens.deleteConfirm": "¿Estás seguro de que deseas eliminar esta clave?",
   "profile.tokens.saved": "Clave guardada exitosamente",
   "profile.tokens.deleted": "Clave eliminada exitosamente",
-  "profile.tokens.failedDelete": "Error al eliminar la clave"
+  "profile.tokens.failedDelete": "Error al eliminar la clave",
+  "profile.tokens.noTokens": "Aún no has guardado ninguna clave. Usa el formulario de arriba para agregar una."
 }

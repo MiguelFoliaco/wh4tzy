@@ -1,39 +1,35 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useUser } from '../auth/context/useUser'
+import { useState } from 'react';
 import { logout } from '../auth/actions/session';
-import { updateProfile } from './actions/update-profile';
+import { updateProfile, type UpdateProfileData } from './actions/update-profile';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/module/common/hook/useToast';
 import { FormTokens } from '../auth/components/form-tokens';
+import type { User } from '@supabase/supabase-js';
+import { useUser } from '../auth/context/useUser';
+import { BiPencil } from 'react-icons/bi';
+import Link from 'next/link';
 
-export const ProfilePage = () => {
-    const { user, exit: _exit, updateUser } = useUser()
+interface ProfilePageProps {
+    authUser: User;
+    profile: UpdateProfileData | null;
+}
+
+export const ProfilePage = ({ authUser, profile: initialProfile }: ProfilePageProps) => {
     const [loading, setLoading] = useState(false)
     const [isSaving, setIsSaving] = useState(false)
     const [isEditing, setIsEditing] = useState(false)
+    const { user, userDB, updateUser } = useUser()
+    const [profile, setProfile] = useState<UpdateProfileData | null>(initialProfile)
+    const [formData, setFormData] = useState(initialProfile);
     const router = useRouter()
     const { openToast } = useToast()
 
-    const [formData, setFormData] = useState({
-        full_name: '',
-        username: '',
-    })
 
-    useEffect(() => {
-        if (user?.user_metadata) {
-            setFormData({
-                full_name: user.user_metadata.full_name || '',
-                username: user.user_metadata.username || '',
-            })
-        }
-    }, [user])
-
-
-
-
-    const handleInputChange = (field: string, value: string) => {
+    const handleInputChange = (field: keyof UpdateProfileData, value: string | number | boolean) => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        //@ts-ignore
         setFormData(prev => ({ ...prev, [field]: value }))
     }
 
@@ -41,12 +37,19 @@ export const ProfilePage = () => {
         setIsSaving(true)
         try {
             const result = await updateProfile({
-                full_name: formData.full_name,
-                username: formData.username,
+                name: formData!.name!,
+                username: formData!.username!,
+                email: user?.email || '',
+                lastname: formData!.lastname!,
+                auth_id: user?.id || '',
+                avatar_url: profile?.avatar_url || null,
+                role: 'owner',
+                phone_number: profile?.phone_number || null,
             })
 
-            if (result.success && result.data) {
-                updateUser(result.data.user)
+            if (result.success && result.data?.user) {
+                setProfile(result.userDB as unknown as UpdateProfileData)
+                updateUser(result.data.user, result!.userDB!)
                 openToast('Perfil actualizado correctamente', 'success')
                 setIsEditing(false)
             } else {
@@ -63,12 +66,11 @@ export const ProfilePage = () => {
     const exit = async () => {
         setLoading(true)
         await logout()
-        _exit()
         setLoading(false)
         router.push('/')
     }
 
-    if (!user) {
+    if (!authUser) {
         return (
             <div className="min-h-screen flex items-center justify-center px-4">
                 <div className="text-center">
@@ -78,9 +80,15 @@ export const ProfilePage = () => {
         )
     }
 
+    const displayName = profile?.name || ''
+    const displayEmail = profile?.email
+    const displayId = profile?.id;
+    const displayCreatedAt = profile?.created_at || authUser.created_at;
+
     return (
         <div className="min-h-screen bg-base-100 py-12 px-4">
             <div className="max-w-2xl mx-auto">
+                <Link href={'/'} className="link mb-2 block">Go back</Link>
                 {/* Header */}
                 <div className="flex items-start justify-between mb-8">
                     <div>
@@ -89,8 +97,9 @@ export const ProfilePage = () => {
                     </div>
                     <button
                         onClick={() => setIsEditing(!isEditing)}
-                        className="btn btn-sm btn-ghost gap-2"
+                        className="btn btn-sm btn-warning gap-2"
                     >
+                        <BiPencil />
                         {isEditing ? 'Cancel' : 'Edit'}
                     </button>
                 </div>
@@ -100,13 +109,13 @@ export const ProfilePage = () => {
                     {/* Avatar Section */}
                     <div className="flex items-center gap-6">
                         <div className="w-20 h-20 bg-linear-to-br from-primary to-secondary rounded-lg flex items-center justify-center text-base-100 font-bold text-2xl">
-                            {formData.full_name?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || 'U'}
+                            {displayName?.[0]?.toUpperCase() || displayEmail?.[0]?.toUpperCase() || 'U'}
                         </div>
                         <div>
                             <h2 className="text-xl font-semibold text-base-content">
-                                {formData.full_name || 'User'}
+                                {displayName}
                             </h2>
-                            <p className="text-sm text-base-content/60">{user.email}</p>
+                            <p className="text-sm text-base-content/60">{displayEmail}</p>
                         </div>
                     </div>
 
@@ -121,7 +130,7 @@ export const ProfilePage = () => {
                             </label>
                             <input
                                 type="email"
-                                value={user.email || ''}
+                                value={displayEmail}
                                 disabled
                                 className="w-full px-4 py-3 bg-base-200/30 border border-base-300/30 rounded-lg text-base-content/60 text-sm"
                             />
@@ -131,14 +140,30 @@ export const ProfilePage = () => {
                         {/* Full Name Field */}
                         <div>
                             <label className="text-sm font-semibold text-base-content/80 block mb-2">
-                                Full Name
+                                Name
                             </label>
                             <input
                                 type="text"
-                                value={formData.full_name}
-                                onChange={(e) => handleInputChange('full_name', e.target.value)}
+                                value={formData?.name || ''}
+                                onChange={(e) => handleInputChange('name', e.target.value)}
                                 disabled={!isEditing}
                                 placeholder="Enter your full name"
+                                className={`w-full px-4 py-3 border rounded-lg text-sm transition-colors ${isEditing
+                                    ? 'bg-base-100 border-base-300/50 text-base-content focus:outline-none focus:ring-2 focus:ring-primary/30'
+                                    : 'bg-base-200/30 border-base-300/30 text-base-content/60'
+                                    }`}
+                            />
+                        </div>
+                        <div>
+                            <label className="text-sm font-semibold text-base-content/80 block mb-2">
+                                Last Name
+                            </label>
+                            <input
+                                type="text"
+                                value={formData?.lastname || ''}
+                                onChange={(e) => handleInputChange('lastname', e.target.value)}
+                                disabled={!isEditing}
+                                placeholder="Enter your last name"
                                 className={`w-full px-4 py-3 border rounded-lg text-sm transition-colors ${isEditing
                                     ? 'bg-base-100 border-base-300/50 text-base-content focus:outline-none focus:ring-2 focus:ring-primary/30'
                                     : 'bg-base-200/30 border-base-300/30 text-base-content/60'
@@ -153,7 +178,7 @@ export const ProfilePage = () => {
                             </label>
                             <input
                                 type="text"
-                                value={formData.username}
+                                value={formData?.username || ''}
                                 onChange={(e) => handleInputChange('username', e.target.value)}
                                 disabled={!isEditing}
                                 placeholder="Enter your username"
@@ -171,7 +196,7 @@ export const ProfilePage = () => {
                             </label>
                             <input
                                 type="text"
-                                value={user.id || ''}
+                                value={displayId}
                                 disabled
                                 className="w-full px-4 py-3 bg-base-200/30 border border-base-300/30 rounded-lg text-base-content/60 text-sm font-mono"
                             />
@@ -185,7 +210,7 @@ export const ProfilePage = () => {
                             </label>
                             <input
                                 type="text"
-                                value={new Date(user.created_at || '').toLocaleDateString('en-US', {
+                                value={new Date(displayCreatedAt || '').toLocaleDateString('en-US', {
                                     year: 'numeric',
                                     month: 'long',
                                     day: 'numeric'
@@ -237,9 +262,14 @@ export const ProfilePage = () => {
                 </div>
 
 
-                <div className='bg-base-100 border border-base-300/30 rounded-lg p-8 space-y-8'>
-                    <FormTokens />
-                </div>
+                {
+                    userDB && (
+
+                        <div className='bg-base-100 border border-base-300/30 rounded-lg p-8 space-y-8'>
+                            <FormTokens />
+                        </div>
+                    )
+                }
             </div>
         </div>
     )

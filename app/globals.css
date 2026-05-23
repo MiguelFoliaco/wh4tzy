@@ -3,58 +3,90 @@
 
 @plugin "daisyui/theme" {
   name: "wh4tzy";
-  default: false;
-  prefersdark: false;
-  color-scheme: "light";
+  default: true;
+  prefersdark: true;
+  color-scheme: "dark";
 
-  /* Modern Tech Dark Backgrounds */
-  --color-base-100: oklch(98% 0.001 255);
-  --color-base-200: oklch(94% 0.002 255);
-  --color-base-300: oklch(88% 0.003 255);
-  --color-base-content: oklch(20% 0.008 255);
+  /* =========================
+     BACKGROUNDS
+  ========================= */
 
-  /* Digital Blue Primary */
-  --color-primary: oklch(55% 0.25 263);
-  --color-primary-content: oklch(99% 0.001 255);
+  --color-base-100: oklch(18% 0.015 180);
+  --color-base-200: oklch(21% 0.018 180);
+  --color-base-300: oklch(24% 0.02 180);
 
-  /* Tech Secondary - Teal/Cyan */
-  --color-secondary: oklch(68% 0.16 255);
-  --color-secondary-content: oklch(15% 0.01 255);
+  /* Texto */
+  --color-base-content: oklch(92% 0.01 180);
 
-  /* Accent - Electric Yellow */
-  --color-accent: oklch(80% 0.18 95);
-  --color-accent-content: oklch(18% 0.02 95);
+  /* =========================
+     PRIMARY (WhatsApp Green)
+  ========================= */
 
-  /* Neutral - Cool Gray */
-  --color-neutral: oklch(42% 0.008 255);
-  --color-neutral-content: oklch(97% 0.001 255);
+  --color-primary: oklch(72% 0.21 154);
+  --color-primary-content: oklch(18% 0.02 154);
 
-  /* Status colors - Tech focused */
-  --color-info: oklch(75% 0.14 255);
-  --color-info-content: oklch(18% 0.01 255);
+  /* =========================
+     SECONDARY
+  ========================= */
 
-  --color-success: oklch(72% 0.17 155);
-  --color-success-content: oklch(18% 0.02 155);
+  --color-secondary: oklch(58% 0.12 185);
+  --color-secondary-content: oklch(95% 0.01 185);
 
-  --color-warning: oklch(82% 0.18 85);
-  --color-warning-content: oklch(20% 0.03 85);
+  /* =========================
+     ACCENT
+  ========================= */
 
-  --color-error: oklch(70% 0.22 20);
-  --color-error-content: oklch(97% 0.01 20);
+  --color-accent: oklch(78% 0.16 160);
+  --color-accent-content: oklch(18% 0.02 160);
 
-  /* Compact & Technical */
-  --radius-selector: 0.25rem;
-  --radius-field: 0.25rem;
-  --radius-box: 0.25rem;
+  /* =========================
+     NEUTRAL
+  ========================= */
 
-  /* Minimal sizing */
+  --color-neutral: oklch(28% 0.01 180);
+  --color-neutral-content: oklch(90% 0.01 180);
+
+  /* =========================
+     STATUS
+  ========================= */
+
+  --color-info: oklch(70% 0.15 230);
+  --color-info-content: oklch(18% 0.02 230);
+
+  --color-success: oklch(72% 0.21 154);
+  --color-success-content: oklch(18% 0.02 154);
+
+  --color-warning: oklch(82% 0.17 85);
+  --color-warning-content: oklch(20% 0.02 85);
+
+  --color-error: oklch(68% 0.22 25);
+  --color-error-content: oklch(18% 0.02 25);
+
+  /* =========================
+     RADIOS
+  ========================= */
+
+  --radius-selector: 0rem;
+  --radius-field: 0rem;
+  --radius-box: 0rem;
+
+  /* =========================
+     SIZES
+  ========================= */
+
   --size-selector: 0.25rem;
   --size-field: 0.25rem;
 
-  /* Clean borders */
+  /* =========================
+     BORDERS
+  ========================= */
+
   --border: 1px;
 
-  /* Flat modern design */
+  /* =========================
+     EFFECTS
+  ========================= */
+
   --depth: 0;
   --noise: 0;
 }
@@ -66,6 +98,13 @@ html {
 body {
   min-height: 100vh;
   font-family: 'Montserrat Variable', sans-serif;
+
+  background:
+    radial-gradient(circle at top,
+      oklch(24% 0.025 170),
+      oklch(18% 0.015 180));
+
+  color: oklch(92% 0.01 180);
 }
 
 input,
@@ -77,51 +116,4 @@ span,
 p,
 li {
   outline: none;
-}
-
-/* Editor Typography - Tech focused */
-h1 {
-  font-weight: 700;
-  font-size: 28px;
-  color: hsl(var(--bc) / 1);
-  letter-spacing: -0.5px;
-}
-
-h2 {
-  font-weight: 600;
-  font-size: 22px;
-  color: hsl(var(--bc) / 0.95);
-  letter-spacing: -0.3px;
-}
-
-h3 {
-  font-weight: 600 !important;
-  font-size: 18px;
-  color: hsl(var(--bc) / 0.9);
-  letter-spacing: -0.2px;
-}
-
-h4 {
-  font-weight: 600 !important;
-  font-size: 16px;
-  color: hsl(var(--bc) / 0.85);
-}
-
-/* Custom Scrollbar - Tech style */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: hsl(var(--b2) / 0.3);
-}
-
-::-webkit-scrollbar-thumb {
-  background: hsl(var(--bc) / 0.2);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--bc) / 0.4);
 }

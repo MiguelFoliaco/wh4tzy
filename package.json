@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "types-db": "genTypes.bat",
-    "create-migration": "supabase migration new",
+    "migrate": "supabase migration new",
     "diff-migration": "supabase migration diff -f",
     "push": "supabase db push",
     "pull": "supabase db pull"

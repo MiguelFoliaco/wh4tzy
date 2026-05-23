@@ -26,9 +26,9 @@ export const SwitchLan = () => {
 
 
     return (
-        <button className='btn btn-sm btn-ghost btn-neutral gap-2' onClick={toogleLocale} >
+        <button className='btn btn-sm btn-secondary  gap-2' onClick={toogleLocale} >
             <Image src={flagByLan[locale]} alt={locale} width={30} height={30} className='w-5 h-5 object-contain rounded-md' />
-            <span>{nameByLan[locale]}</span>
+            {nameByLan[locale]}
         </button>
     )
 }

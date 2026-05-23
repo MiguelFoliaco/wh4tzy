@@ -46,5 +46,6 @@
   "profile.tokens.deleteConfirm": "このトークンを削除してもよろしいですか？",
   "profile.tokens.saved": "トークンが正常に保存されました",
   "profile.tokens.deleted": "トークンが正常に削除されました",
-  "profile.tokens.failedDelete": "トークンの削除に失敗しました"
+  "profile.tokens.failedDelete": "トークンの削除に失敗しました",
+  "profile.tokens.noTokens": "まだトークンが保存されていません。上のフォームを使用して追加してください。"
 }
